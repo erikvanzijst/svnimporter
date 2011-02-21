@@ -1,0 +1,5 @@
+Useful resources:
+
+http://doc.qt.nokia.com/4.7/index.html
+http://zetcode.com/tutorials/pyqt4/
+ipython: help(QtGui.QFileDialog)
