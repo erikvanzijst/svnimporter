@@ -1,4 +1,8 @@
 import sys
+import util
+import traceback
+
+from cgi import escape
 from PyQt4 import QtGui, QtCore
 from mercurial import hg, ui
 from hgsubversion import svnrepo
@@ -20,14 +24,14 @@ class WizardPage(QtGui.QWizardPage):
                 self._buffers[-1].extend([str(a) for a in args])
             else:
                 for msg in args:
-                    self.logInfo(str(msg))
+                    self.logInfo(escape(str(msg)))
 
         def write_err(self, *args, **opts):
             if self._buffers:
                 self._buffers[-1].extend([str(a) for a in args])
             else:
                 for msg in args:
-                    self.logError(str(msg))
+                    self.logError(escape(str(msg)))
 
         def flush(self):
             pass
@@ -46,14 +50,19 @@ class WizardPage(QtGui.QWizardPage):
             self.config = opts
 
         def run(self):
-            self.info.emit(u'Importing %s into %s...' % (self.config['url'], self.config['dest']))
+            self.info.emit(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
             try:
                 src = svnrepo.instance(self.ui, self.config['url'], False)
                 hg.clone(self.ui, src, self.config['dest'])
                 self.info.emit(u'Done')
 
             except Exception:
-                self.error.emit(u'%s: %s' % (str(sys.exc_info()[0]), str(sys.exc_info()[1])))
+                type_, message, tb = sys.exc_info()
+                print util.traceback_to_str(tb)
+                self.error.emit(escape(u'%s: %s' % (str(type_), str(message))))
+                for frame in traceback.format_list(traceback.extract_tb(tb)):
+                    self.error.emit(escape(frame))
+
 
 
     def __init__(self, *args, **kwargs):
@@ -99,7 +108,11 @@ class WizardPage(QtGui.QWizardPage):
             self.job = job
 
         except:
-            print sys.exc_info()[0], sys.exc_info()[1]
+            type_, message, tb = sys.exc_info()
+            print util.traceback_to_str(tb)
+            self._error(escape(u'%s: %s' % (str(type_), str(message))))
+            for frame in traceback.format_list(traceback.extract_tb(tb)):
+                self.error.emit(escape(frame))
 
     def _info(self, msg):
         msg = str(msg)
