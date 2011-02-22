@@ -2,6 +2,7 @@ import sys
 import traceback
 from PyQt4 import QtGui
 from mercurial import hg, ui
+from hgsubversion import svnrepo
 
 __author__ = 'erik'
 
@@ -18,7 +19,6 @@ class WizardPage(QtGui.QWizardPage):
             if self._buffers:
                 self._buffers[-1].extend([str(a) for a in args])
             else:
-                print type(self.logView)
                 for msg in args:
                     msg = str(msg)
                     self.logView.appendHtml(u'<div>%s</div>' % (msg[0:-1] if msg.endswith('\n') else msg))
@@ -27,7 +27,6 @@ class WizardPage(QtGui.QWizardPage):
             if self._buffers:
                 self._buffers[-1].extend([str(a) for a in args])
             else:
-                print type(self.logView)
                 for msg in args:
                     msg = str(msg)
                     self.logView.appendHtml(u'<div style="color: red">%s</div>' % (msg[0:-1] if msg.endswith('\n') else msg))
@@ -69,7 +68,7 @@ class WizardPage(QtGui.QWizardPage):
 
         self.u.write(u'Importing %s into %s...' % (url, dest))
         try:
-            src = hg.repository(self.u, url)
+            src = svnrepo.instance(self.u, url, False)
             hg.clone(self.u, src, dest)
             self.u.write(u'Done')
 
