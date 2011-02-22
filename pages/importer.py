@@ -50,19 +50,22 @@ class WizardPage(QtGui.QWizardPage):
             self.config = opts
 
         def run(self):
-            self.info.emit(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
             try:
+                self.info.emit(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
                 src = svnrepo.instance(self.ui, self.config['url'], False)
                 hg.clone(self.ui, src, self.config['dest'])
                 self.info.emit(u'Done')
 
             except Exception:
                 type_, message, tb = sys.exc_info()
-                print util.traceback_to_str(tb)
-                self.error.emit(escape(u'%s: %s' % (str(type_), str(message))))
-                for frame in traceback.format_list(traceback.extract_tb(tb)):
-                    self.error.emit(escape(frame))
-
+                try:
+                    self.error.emit(escape(u'%s: %s' % (str(type_), str(message))))
+                    for frame in traceback.format_list(traceback.extract_tb(tb)):
+                        self.error.emit(escape(frame))
+                except:
+                    pass
+                finally:
+                    print util.traceback_to_str(tb)
 
 
     def __init__(self, *args, **kwargs):
@@ -109,10 +112,14 @@ class WizardPage(QtGui.QWizardPage):
 
         except:
             type_, message, tb = sys.exc_info()
-            print util.traceback_to_str(tb)
-            self._error(escape(u'%s: %s' % (str(type_), str(message))))
-            for frame in traceback.format_list(traceback.extract_tb(tb)):
-                self.error.emit(escape(frame))
+            try:
+                self._error(escape(u'%s: %s' % (str(type_), str(message))))
+                for frame in traceback.format_list(traceback.extract_tb(tb)):
+                    self._error.emit(escape(frame))
+            except:
+                pass
+            finally:
+                print util.traceback_to_str(tb)
 
     def _info(self, msg):
         msg = str(msg)
