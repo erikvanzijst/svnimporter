@@ -1,5 +1,5 @@
 TODO:
-- Background processing
+- Apply html escaping in log messages
 - Upload to BB page
 - Bundle all libs
 - OSX image
