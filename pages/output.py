@@ -30,4 +30,4 @@ class WizardPage(QtGui.QWizardPage):
         self.setLayout(grid)
 
     def _showFileDialog(self):
-        self.dirEdit.setText(QtGui.QFileDialog.getExistingDirectory(self, 'Choose directory'))
+        self.dirEdit.setText(QtGui.QFileDialog.getExistingDirectory(self, 'Specify repository destination'))
