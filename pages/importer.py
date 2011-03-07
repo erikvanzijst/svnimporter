@@ -1,4 +1,5 @@
 import sys
+from hgsubversion.svnrepo import svnremoterepo
 import util
 import traceback
 
@@ -52,7 +53,7 @@ class WizardPage(QtGui.QWizardPage):
         def run(self):
             try:
                 self.info.emit(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
-                src = svnrepo.instance(self.ui, self.config['url'], False)
+                src = svnremoterepo(self.ui, self.config['url'])
                 hg.clone(self.ui, src, self.config['dest'])
                 self.info.emit(u'Done')
 
