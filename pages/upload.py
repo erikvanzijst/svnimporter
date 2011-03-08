@@ -10,8 +10,8 @@ class UnauthorizedException(Exception):
     pass
 
 class RemoteException(Exception):
-	'''Raised when a remote call failed.'''
-	pass
+    '''Raised when a remote call failed.'''
+    pass
 
 class BadRequestException(Exception):
     pass
@@ -102,13 +102,21 @@ class WizardPage(QtGui.QWizardPage):
 
                 self._create_repository(bb_username, bb_password, bb_reponame)
                 self.emit(QtCore.SIGNAL('login_successful(PyQt_PyObject)'), None)
+
+            except UnauthorizedException:
+                self.emit(QtCore.SIGNAL('login_failed(PyQt_PyObject)'),
+                          u'Username or password incorrect.')
+            except BadRequestException:
+                self.emit(QtCore.SIGNAL('login_failed(PyQt_PyObject)'),
+                          u'Unable to create repository. Do you already have a'
+                          'repository named "%s"?' % bb_reponame)
             except:
-                self.emit(QtCore.SIGNAL('login_failed(PyQt_PyObject)'), None)
+                self.emit(QtCore.SIGNAL('login_failed(PyQt_PyObject)'),
+                          u'Unknown error while talking to Bitbucket.')
 
         def _create_repository(self, username, password, repo_name):
             '''Makes a REST call to Bitbucket to create the new remote repository
-           before we can push.'''
-            resp = None
+            before we can push.'''
             try:
                 resp = request('https://api.bitbucket.org/1.0/repositories/',
                                method='POST',
