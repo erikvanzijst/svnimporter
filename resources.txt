@@ -5,3 +5,4 @@ http://zetcode.com/tutorials/pyqt4/
 ipython: help(QtGui.QFileDialog)
 http://stackoverflow.com/questions/1595649/threading-in-a-pyqt-application-use-qt-threads-or-python-threads
 http://benoitc.github.com/restkit/api/index.html
+https://svn.atlassian.com/svn/public/atlassian/crucible/plugins/review-creator/
