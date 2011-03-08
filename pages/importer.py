@@ -14,6 +14,7 @@ __author__ = 'erik'
 class WizardPage(QtGui.QWizardPage):
 
     class _UI(ui.ui):
+        # TODO: replace with util.MercurialUI
         def __init__(self, src=None):
             ui.ui.__init__(self, src)
             if src and src.__dict__.has_key('logInfo') and src.__dict__.has_key('logError'):
@@ -93,7 +94,7 @@ class WizardPage(QtGui.QWizardPage):
         url         = str(QtGui.QWizardPage.field(self, 'url').toString())
         username    = str(QtGui.QWizardPage.field(self, 'username').toString())
         password    = str(QtGui.QWizardPage.field(self, 'password').toString())
-        dest        = str(QtGui.QWizardPage.field(self, 'output').toString())
+        dest        = str(QtGui.QWizardPage.field(self, 'localDir').toString())
 
         try:
             job = WizardPage.Job(self.u, **{

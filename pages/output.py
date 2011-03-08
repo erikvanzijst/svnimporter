@@ -19,7 +19,7 @@ class WizardPage(QtGui.QWizardPage):
         grid.addWidget(dir, 1, 0)
         self.dirEdit = QtGui.QLineEdit()
         grid.addWidget(self.dirEdit, 1, 1)
-        QtGui.QWizardPage.registerField(self, 'output*', self.dirEdit)
+        QtGui.QWizardPage.registerField(self, 'localDir*', self.dirEdit)
 
         openFile = QtGui.QPushButton('Browse', self)
         openFile.setShortcut('Ctrl+O')
