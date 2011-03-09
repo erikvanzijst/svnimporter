@@ -41,11 +41,6 @@ class WizardPage(QtGui.QWizardPage):
 
     class Job(QtCore.QThread):
 
-        # Signals:
-        info = QtCore.pyqtSignal(str, name='info')
-        error = QtCore.pyqtSignal(str, name='error')
-        progress = QtCore.pyqtSignal(int, name='progress')
-
         def __init__(self, ui, **opts):
             QtCore.QThread.__init__(self)
             self.ui = ui
@@ -53,17 +48,17 @@ class WizardPage(QtGui.QWizardPage):
 
         def run(self):
             try:
-                self.info.emit(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
+                self.ui.write(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
                 src = svnremoterepo(self.ui, self.config['url'])
                 hg.clone(self.ui, src, self.config['dest'])
-                self.info.emit(u'Done')
+                self.ui.write(u'Done')
 
             except Exception:
                 type_, message, tb = sys.exc_info()
                 try:
-                    self.error.emit(escape(u'%s: %s' % (str(type_), str(message))))
+                    self.ui.write_err(escape(u'%s: %s' % (str(type_), str(message))))
                     for frame in traceback.format_list(traceback.extract_tb(tb)):
-                        self.error.emit(escape(frame))
+                        self.ui.write_err(escape(frame))
                 except:
                     pass
                 finally:
@@ -103,8 +98,7 @@ class WizardPage(QtGui.QWizardPage):
                 'password': password,
                 'dest': dest
             })
-            job.info.connect(self._info)
-            job.error.connect(self._error)
+            self.connect(self, QtCore.SIGNAL('log(PyQt_PyObject)'), self.logView.appendHtml)
             job.start()
 
             # If we don't keep a reference to the job around, the garbage
@@ -117,7 +111,7 @@ class WizardPage(QtGui.QWizardPage):
             try:
                 self._error(escape(u'%s: %s' % (str(type_), str(message))))
                 for frame in traceback.format_list(traceback.extract_tb(tb)):
-                    self._error.emit(escape(frame))
+                    self._error(escape(frame))
             except:
                 pass
             finally:
@@ -125,11 +119,14 @@ class WizardPage(QtGui.QWizardPage):
 
     def _info(self, msg):
         msg = str(msg)
-        self.logView.appendHtml(u'<div>%s</div>' % (msg[0:-1] if msg.endswith('\n') else msg))
+        self.emit(QtCore.SIGNAL('log(PyQt_PyObject)'),
+                  str('<div>%s</div>' % (msg[0:-1] if msg.endswith('\n') else msg)))
 
     def _error(self, msg):
         msg = str(msg)
-        self.logView.appendHtml(u'<div style="color: red">%s</div>' % (msg[0:-1] if msg.endswith('\n') else msg))
+        self.emit(QtCore.SIGNAL('log(PyQt_PyObject)'),
+                  str(u'<div style="color: red">%s</div>' %
+                      (msg[0:-1] if msg.endswith('\n') else msg)))
 
     def _job_finished(self):
         # TODO: disconnect signals
