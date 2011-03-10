@@ -1,12 +1,11 @@
 import sys
-from hgsubversion.svnrepo import svnremoterepo
 import util
 import traceback
 
 from cgi import escape
 from PyQt4 import QtGui, QtCore
 from mercurial import hg, ui
-from hgsubversion import svnrepo
+import hgsubversion
 
 __author__ = 'erik'
 
@@ -49,8 +48,11 @@ class WizardPage(QtGui.QWizardPage):
         def run(self):
             try:
                 self.ui.write(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
-                src = svnremoterepo(self.ui, self.config['url'])
-                hg.clone(self.ui, src, self.config['dest'])
+#                src = hg.repository(self.ui, self.config['url'])
+#                d = hg.repository(self.ui, self.config['dest'], create=True)
+#                svn_repo = hg.repository(self.ui, self.config['url'])
+#                d.pull(svn_repo, heads=[])
+                hg.clone(self.ui, self.config['url'], self.config['dest'])
                 self.ui.write(u'Done')
 
             except Exception:
@@ -93,10 +95,12 @@ class WizardPage(QtGui.QWizardPage):
 
         try:
             job = WizardPage.Job(self.u, **{
-                'url': url,
+#                'url': url,
+                'url': 'file:///home/erik/svn-repo',
                 'username': username,
                 'password': password,
-                'dest': dest
+#                'dest': dest,
+                'dest': sys.argv[1]
             })
             self.connect(self, QtCore.SIGNAL('log(PyQt_PyObject)'), self.logView.appendHtml)
             job.start()
