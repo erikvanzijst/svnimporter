@@ -1,5 +1,5 @@
 TODO:
-- Upload to BB page
+- Remove restkit and use QNetwork.so instead
 - Bundle all libs
 - OSX image
 - Windows exe
