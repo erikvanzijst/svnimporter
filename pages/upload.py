@@ -30,17 +30,17 @@ class WizardPage(QtGui.QWizardPage):
 
     def initializePage(self):
 
-        localDir = sys.argv[1]
-        bb_username = 'evzijst'
-        bb_password = 'pass'
-        bb_reponame = sys.argv[2]
-#        localDir = str(QtGui.QWizardPage.field(self.parent, 'localDir').toString())
-#        bb_username = str(QtGui.QWizardPage.field(self.parent, 'bb_username').toString())
-#        bb_password = str(QtGui.QWizardPage.field(self.parent, 'bb_password').toString())
-#        bb_reponame = str(QtGui.QWizardPage.field(self.parent, 'bb_reponame').toString())
+#        localDir = sys.argv[1]
+#        bb_username = 'evzijst'
+#        bb_password = 'pass'
+#        bb_reponame = sys.argv[2]
+        localDir = str(QtGui.QWizardPage.field(self.parent, 'localDir').toString())
+        bb_username = str(QtGui.QWizardPage.field(self.parent, 'bb_username').toString())
+        bb_password = str(QtGui.QWizardPage.field(self.parent, 'bb_password').toString())
+        bb_reponame = str(QtGui.QWizardPage.field(self.parent, 'bb_reponame').toString())
         url = u'https://bitbucket.org/%s/%s' % (bb_username, bb_reponame)
 
-        self.description.setText('<qt><p>Pushing <b>%s</b> to <b>%s</b><p><qt>' % (localDir, bb_reponame))
+        self.description.setText('<qt><p>Pushing <b>%s</b> to <b>%s</b><p><qt>' % (localDir, url))
 
         self.task = WizardPage.Task(self, **{
             'localDir': localDir,
@@ -49,6 +49,7 @@ class WizardPage(QtGui.QWizardPage):
             'bb_reponame': bb_reponame
             })
         self.connect(self, QtCore.SIGNAL('log(PyQt_PyObject)'), self.logView.appendHtml)
+        self.connect(self.task, QtCore.SIGNAL('finished()'), self._job_finished)
         self.task.start()
 
     def _info(self, msg):
@@ -63,7 +64,7 @@ class WizardPage(QtGui.QWizardPage):
                       (msg[0:-1] if msg.endswith('\n') else msg)))
 
     def _job_finished(self):
-        # TODO: disconnect signals
+        # TODO: disconnect signals and enable finish button
         pass
 
     class Task(QtCore.QThread):
@@ -90,19 +91,23 @@ class WizardPage(QtGui.QWizardPage):
                     self.opts['bb_reponame']
                 )
 
-                url = self.opts['bb_reponame']
-
                 repo = hg.repository(self.ui, path=self.opts['localDir'], create=False)
                 self.ui.write(u'Connecting to ' + hg_url.hidepassword(url))
                 other = hg.repository(hg.remoteui(repo, {}), url)
                 self.ui.write(u'pushing to %s\n' % hg_url.hidepassword(url))
 
                 result = repo.push(other)
-                print 'Push succeeded. Result code:', result
+                if result == 0:
+                    self.ui.write(u'Repository pushed successfully!')
+                else:
+                    self.ui.error(u'Push failed. Mercurial return code: %s', result)
+                print 'Push completed. Result code:', result
 
             except:
                 type_, message, tb = sys.exc_info()
-                print 'Push failed:', type_, message
+                self.ui.error(u'Push failed: %s: %s' % (type_, message))
+                self.ui.error(util.traceback_to_str(tb))
                 print util.traceback_to_str(tb)
 
-
+            finally:
+                self.emit(QtCore.SIGNAL('finished()'))
