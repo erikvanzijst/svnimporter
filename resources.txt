@@ -7,3 +7,4 @@ http://stackoverflow.com/questions/1595649/threading-in-a-pyqt-application-use-q
 http://benoitc.github.com/restkit/api/index.html
 https://svn.atlassian.com/svn/public/atlassian/crucible/plugins/review-creator/
 http://blog.qgis.org/node/102
+http://hgsubversion.googlecode.com/hg/hgsubversion/help/subversion.rst?r=c9811351627c23b76f024713bb079d5d2922338a
