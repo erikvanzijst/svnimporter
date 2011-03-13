@@ -3,6 +3,7 @@ from util import MercurialUI
 from mercurial import hg, url as hg_url
 import util
 import sys
+import traceback
 
 __author__ = 'erik'
 
@@ -107,7 +108,7 @@ class WizardPage(QtGui.QWizardPage):
                 type_, message, tb = sys.exc_info()
                 self.ui.error(u'Push failed: %s: %s' % (type_, message))
                 self.ui.error(util.traceback_to_str(tb))
-                print util.traceback_to_str(tb)
+                traceback.print_exception(*sys.exc_info())
 
             finally:
                 self.emit(QtCore.SIGNAL('finished()'))
