@@ -4,63 +4,38 @@ import traceback
 
 from cgi import escape
 from PyQt4 import QtGui, QtCore
-from mercurial import hg, ui
+from mercurial import hg
 import hgsubversion
 
 __author__ = 'erik'
 
-
 class WizardPage(QtGui.QWizardPage):
-
-    class _UI(ui.ui):
-        # TODO: replace with util.MercurialUI
-        def __init__(self, src=None):
-            ui.ui.__init__(self, src)
-            if src and src.__dict__.has_key('logInfo') and src.__dict__.has_key('logError'):
-                self.logInfo = src.logInfo
-                self.logError = src.logError
-
-        def write(self, *args, **opts):
-            if self._buffers:
-                self._buffers[-1].extend([str(a) for a in args])
-            else:
-                for msg in args:
-                    self.logInfo(escape(str(msg)))
-
-        def write_err(self, *args, **opts):
-            if self._buffers:
-                self._buffers[-1].extend([str(a) for a in args])
-            else:
-                for msg in args:
-                    self.logError(escape(str(msg)))
-
-        def flush(self):
-            pass
-
 
     class Job(QtCore.QThread):
 
-        def __init__(self, ui, **opts):
+        def __init__(self, ui, widget, **opts):
             QtCore.QThread.__init__(self)
             self.ui = ui
+            self.widget = widget
             self.config = opts
 
         def run(self):
             try:
-                self.ui.write(u'Importing <b>%s</b> into <b>%s</b>...' % (self.config['url'], self.config['dest']))
+                self.widget._info(u'Importing <b>%s</b> into <b>%s</b>...' %
+                                  (self.config['url'], self.config['dest']))
 #                src = hg.repository(self.ui, self.config['url'])
 #                d = hg.repository(self.ui, self.config['dest'], create=True)
 #                svn_repo = hg.repository(self.ui, self.config['url'])
 #                d.pull(svn_repo, heads=[])
                 hg.clone(self.ui, self.config['url'], self.config['dest'])
-                self.ui.write(u'Done')
+                self.widget._info(u'Done')
 
             except Exception:
                 type_, message, tb = sys.exc_info()
                 try:
-                    self.ui.write_err(escape(u'%s: %s' % (str(type_), str(message))))
+                    self.widget._error(escape(u'%s: %s' % (str(type_), str(message))))
                     for frame in traceback.format_list(traceback.extract_tb(tb)):
-                        self.ui.write_err(escape(frame))
+                        self.widget._error(escape(frame))
                 except:
                     pass
                 finally:
@@ -81,11 +56,12 @@ class WizardPage(QtGui.QWizardPage):
 
         self.setLayout(grid)
 
-        self.u = WizardPage._UI()
-        self.u.logInfo = self._info
-        self.u.logError = self._error
-        self.u.setconfig('ui', 'interactive', 'off')
-        self.u.setconfig("ui", "formatted", None)
+        self.ui = util.MercurialUI()
+        self.ui.logInfo = self._info
+        self.ui.logError = self._error
+        self.ui.setconfig('ui', 'interactive', 'off')
+        self.ui.setconfig("ui", "formatted", None)
+        self.ui.setconfig('ui', 'quiet', False)
 
     def initializePage(self):
         url         = str(QtGui.QWizardPage.field(self, 'url').toString())
@@ -94,7 +70,7 @@ class WizardPage(QtGui.QWizardPage):
         dest        = str(QtGui.QWizardPage.field(self, 'localDir').toString())
 
         try:
-            job = WizardPage.Job(self.u, **{
+            job = WizardPage.Job(self.ui, self, **{
 #                'url': url,
                 'url': 'file:///home/erik/svn-repo',
                 'username': username,
@@ -119,7 +95,7 @@ class WizardPage(QtGui.QWizardPage):
             except:
                 pass
             finally:
-                print util.traceback_to_str(tb)
+                traceback.print_exception(*sys.exc_info())
 
     def _info(self, msg):
         msg = str(msg)
