@@ -33,7 +33,7 @@ class WizardPage(QtGui.QWizardPage):
                 'as well as a name for the new repository and we\'ll upload it '
                 'straight to Bitbucket!</p>\n'
                 '<p>If you don\'t have a Bitbucket account yet, <a href="https://bitbucket.org/account/signup/">'
-                'click here to sign up for free</a>.<p><qt>')
+                'click here to sign up free</a>.<p><qt>')
         description.setWordWrap(True)
         description.setOpenExternalLinks( True ) 
 
