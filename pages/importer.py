@@ -71,12 +71,12 @@ class WizardPage(QtGui.QWizardPage):
 
         try:
             job = WizardPage.Job(self.ui, self, **{
-#                'url': url,
-                'url': 'file:///home/erik/svn-repo',
+                'url': url,
+#                'url': 'file:///home/erik/work/repos/test',
                 'username': username,
                 'password': password,
-#                'dest': dest,
-                'dest': sys.argv[1]
+                'dest': dest,
+#                'dest': sys.argv[1]
             })
             self.connect(self, QtCore.SIGNAL('log(PyQt_PyObject)'), self.logView.appendHtml)
             job.start()

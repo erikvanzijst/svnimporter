@@ -36,7 +36,15 @@ class WizardPage(QtGui.QWizardPage):
                 'click here to sign up for free</a>.<p><qt>')
         description.setWordWrap(True)
         description.setOpenExternalLinks( True ) 
-        grid.addWidget(description, 0, 0, 1, 2)
+
+        logo = QtGui.QLabel()
+        image = QtGui.QPixmap('images/bitbucket.png')
+        logo.setPixmap(image)
+
+        box = QtGui.QHBoxLayout()
+        box.addWidget(logo, alignment=QtCore.Qt.AlignTop)
+        box.addWidget(description, alignment=QtCore.Qt.AlignVCenter, stretch=1)
+        grid.addLayout(box, 0, 0, 1, 2)
 
         username = QtGui.QLabel('Username or Email')
         grid.addWidget(username, 2, 0)
