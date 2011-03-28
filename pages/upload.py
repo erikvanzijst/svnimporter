@@ -12,7 +12,6 @@ class WizardPage(QtGui.QWizardPage):
     def __init__(self, *args, **kwargs):
         QtGui.QWizardPage.__init__(self, *args, **kwargs)
 
-
         self.setTitle('Pushing to Bitbucket')
 
         grid = QtGui.QGridLayout()

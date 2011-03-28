@@ -23,6 +23,7 @@ class WizardPage(QtGui.QWizardPage):
                                   (self.config['url'], self.config['dest']))
                 p = subprocess.Popen(['./hg', 'clone', self.config['url'],
                                      '--config', 'extensions.hgsubversion=../hgsubversion/',
+                                     '--config', 'hgsubversion.authormap=' + self.widget.wizard().authorfile,
                                      '--config', 'hgsubversion.defaulthost=atlassian.com',
                                      '--config', 'ui.interactive=off',
                                      self.config['dest']],
