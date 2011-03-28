@@ -1,11 +1,10 @@
+import subprocess
 import sys
 import util
 import traceback
 
 from cgi import escape
 from PyQt4 import QtGui, QtCore
-from mercurial import hg
-import hgsubversion
 
 __author__ = 'erik'
 
@@ -13,9 +12,8 @@ class WizardPage(QtGui.QWizardPage):
 
     class Job(QtCore.QThread):
 
-        def __init__(self, ui, widget, **opts):
+        def __init__(self, widget, **opts):
             QtCore.QThread.__init__(self)
-            self.ui = ui
             self.widget = widget
             self.config = opts
 
@@ -23,12 +21,32 @@ class WizardPage(QtGui.QWizardPage):
             try:
                 self.widget._info(u'Importing <b>%s</b> into <b>%s</b>...' %
                                   (self.config['url'], self.config['dest']))
-#                src = hg.repository(self.ui, self.config['url'])
-#                d = hg.repository(self.ui, self.config['dest'], create=True)
-#                svn_repo = hg.repository(self.ui, self.config['url'])
-#                d.pull(svn_repo, heads=[])
-                hg.clone(self.ui, self.config['url'], self.config['dest'])
-                self.widget._info(u'Done')
+                p = subprocess.Popen(['./hg', 'clone', self.config['url'],
+                                     '--config', 'extensions.hgsubversion=../hgsubversion/',
+                                     '--config', 'hgsubversion.defaulthost=atlassian.com',
+                                     '--config', 'ui.interactive=off',
+                                     self.config['dest']],
+                                 cwd='./mercurial-1.8.1',
+                                 env={'LD_LIBRARY_PATH': '.',
+                                      'LC_ALL': 'en_US.UTF-8'},
+                                 shell=False,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+                stop = False
+                while not stop:
+                    line = p.stdout.readline()
+                    if not line:
+                        stop = True
+                        print 'child terminated'
+                    else:
+                        print 'output: ' + line
+                        self.widget._info(line)
+
+                ret = p.wait()
+                if ret:
+                    self.widget._error(u'Failed: ' + str(ret))
+                else:
+                    self.widget._info(u'Done')
 
             except Exception:
                 type_, message, tb = sys.exc_info()
@@ -56,13 +74,6 @@ class WizardPage(QtGui.QWizardPage):
 
         self.setLayout(grid)
 
-        self.ui = util.MercurialUI()
-        self.ui.logInfo = self._info
-        self.ui.logError = self._error
-        self.ui.setconfig('ui', 'interactive', 'off')
-        self.ui.setconfig("ui", "formatted", None)
-        self.ui.setconfig('ui', 'quiet', False)
-
     def initializePage(self):
         url         = str(QtGui.QWizardPage.field(self, 'url').toString())
         username    = str(QtGui.QWizardPage.field(self, 'username').toString())
@@ -70,9 +81,9 @@ class WizardPage(QtGui.QWizardPage):
         dest        = str(QtGui.QWizardPage.field(self, 'localDir').toString())
 
         try:
-            job = WizardPage.Job(self.ui, self, **{
+            job = WizardPage.Job(self, **{
                 'url': url,
-#                'url': 'file:///home/erik/work/repos/test',
+#                'url': 'file:///home/erik/work/repos/local-svn',
                 'username': username,
                 'password': password,
                 'dest': dest,
