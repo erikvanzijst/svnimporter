@@ -91,8 +91,13 @@ class WizardPage(QtGui.QWizardPage):
                     self.opts['bb_username'],
                     self.opts['bb_reponame']
                 )
+                url_censored = u'https://%s:...@bitbucket.org/%s/%s' % (
+                    self.opts['bb_username'],
+                    self.opts['bb_username'],
+                    self.opts['bb_reponame']
+                )
 
-                self.widget._info(u'Connecting to ' + hg_url.hidepassword(url))
+                self.widget._info(u'Connecting to ' + url_censored)
                 p = subprocess.Popen(['./hg', 'push', url,
                                      '--config', 'ui.interactive=off'],
                                  cwd='./mercurial-1.8.1',
