@@ -21,7 +21,16 @@ class WizardPage(QtGui.QWizardPage):
         self.description = QtGui.QLabel()
         self.description.setWordWrap(True)
         self.description.setOpenExternalLinks( True )
-        grid.addWidget(self.description, 0, 0, 1, 2)
+
+        logo = QtGui.QLabel()
+        image = QtGui.QPixmap('images/bitbucket.png')
+        logo.setPixmap(image)
+
+        box = QtGui.QHBoxLayout()
+        box.addWidget(logo, alignment=QtCore.Qt.AlignTop)
+        box.addWidget(self.description, alignment=QtCore.Qt.AlignVCenter, stretch=1)
+        grid.addLayout(box, 0, 0, 1, 2)
+
 
         self.logView = QtGui.QPlainTextEdit()
         self.logView.setReadOnly(True)
@@ -35,10 +44,10 @@ class WizardPage(QtGui.QWizardPage):
 #        bb_username = 'evzijst'
 #        bb_password = 'pass'
 #        bb_reponame = sys.argv[2]
-        localDir = str(QtGui.QWizardPage.field(self.parent, 'localDir').toString())
-        bb_username = str(QtGui.QWizardPage.field(self.parent, 'bb_username').toString())
-        bb_password = str(QtGui.QWizardPage.field(self.parent, 'bb_password').toString())
-        bb_reponame = str(QtGui.QWizardPage.field(self.parent, 'bb_reponame').toString())
+        localDir = str(QtGui.QWizardPage.field(self, 'localDir').toString())
+        bb_username = str(QtGui.QWizardPage.field(self, 'bb_username').toString())
+        bb_password = str(QtGui.QWizardPage.field(self, 'bb_password').toString())
+        bb_reponame = str(QtGui.QWizardPage.field(self, 'bb_reponame').toString())
         url = u'https://bitbucket.org/%s/%s' % (bb_username, bb_reponame)
 
         self.description.setText('<qt><p>Pushing <b>%s</b> to <b>%s</b><p><qt>' % (localDir, url))
@@ -101,13 +110,13 @@ class WizardPage(QtGui.QWizardPage):
                 if result == 0:
                     self.ui.write(u'Repository pushed successfully!')
                 else:
-                    self.ui.error(u'Push failed. Mercurial return code: %s', result)
+                    self.ui.write_err(u'Push failed. Mercurial return code: %s', result)
                 print 'Push completed. Result code:', result
 
             except:
                 type_, message, tb = sys.exc_info()
-                self.ui.error(u'Push failed: %s: %s' % (type_, message))
-                self.ui.error(util.traceback_to_str(tb))
+                self.ui.write_err(u'Push failed: %s: %s' % (type_, message))
+                self.ui.write_err(util.traceback_to_str(tb))
                 traceback.print_exception(*sys.exc_info())
 
             finally:
