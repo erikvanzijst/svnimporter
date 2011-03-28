@@ -102,7 +102,7 @@ class WizardPage(QtGui.QWizardPage):
                 p = subprocess.Popen(os.path.join(os.getcwd(), 'mercurial-1.8.1', 'hg') + ' push ' +
                                      url + ' --config ui.interactive=off',
                                  cwd=self.opts['localDir'],
-                                 env={'LD_LIBRARY_PATH': '.',
+                                 env={'LD_LIBRARY_PATH': os.getcwd(),
                                       'LC_ALL': 'en_US.UTF-8'},
                                  shell=True,
                                  stdout=subprocess.PIPE,
