@@ -106,15 +106,10 @@ class WizardPage(QtGui.QWizardPage):
                                  shell=False,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT)
-                stop = False
-                while not stop:
+                line = p.stdout.readline()
+                while line:
+                    self.widget._info(line)
                     line = p.stdout.readline()
-                    if not line:
-                        stop = True
-                        print 'child terminated'
-                    else:
-                        print 'output: ' + line
-                        self.widget._info(line)
 
                 ret = p.wait()
                 if ret:
