@@ -1,0 +1,10 @@
+Useful resources:
+
+http://doc.qt.nokia.com/4.7/index.html
+http://zetcode.com/tutorials/pyqt4/
+ipython: help(QtGui.QFileDialog)
+http://stackoverflow.com/questions/1595649/threading-in-a-pyqt-application-use-qt-threads-or-python-threads
+http://benoitc.github.com/restkit/api/index.html
+https://svn.atlassian.com/svn/public/atlassian/crucible/plugins/review-creator/
+http://blog.qgis.org/node/102
+http://hgsubversion.googlecode.com/hg/hgsubversion/help/subversion.rst?r=c9811351627c23b76f024713bb079d5d2922338a
