@@ -1,5 +1,6 @@
 __author__ = 'erik'
 
+import tempfile
 from PyQt4 import QtGui
 
 class WizardPage(QtGui.QWizardPage):
@@ -28,3 +29,14 @@ class WizardPage(QtGui.QWizardPage):
 # Example:
 # jdoe = John Doe <jdoe@acme.org>
 ''')
+
+    def validatePage(self):
+        # save the mapping file and proceed
+        filename = tempfile.mktemp(prefix='svnimporter_authorfile_')
+        with open(filename, 'w') as f:
+            f.write(str(self.text.toPlainText()))
+
+        self.wizard().authorfile = filename
+        print self.wizard().authorfile
+        return True
+        
