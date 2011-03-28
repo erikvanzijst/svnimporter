@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 import util
 import sys
+import os
 import subprocess
 import traceback
 
@@ -97,14 +98,16 @@ class WizardPage(QtGui.QWizardPage):
                 )
 
                 self.widget._info(u'Connecting to ' + url_censored)
-                p = subprocess.Popen(['./hg', 'push', url,
-                                     '--config', 'ui.interactive=off'],
-                                 cwd='./mercurial-1.8.1',
+                # TODO: shell-escape the url string:
+                p = subprocess.Popen(os.path.join(os.getcwd(), 'mercurial-1.8.1', 'hg') + ' push ' +
+                                     url + ' --config ui.interactive=off',
+                                 cwd=self.opts['localDir'],
                                  env={'LD_LIBRARY_PATH': '.',
                                       'LC_ALL': 'en_US.UTF-8'},
-                                 shell=False,
+                                 shell=True,
                                  stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+                                 stderr=subprocess.STDOUT,
+                                 bufsize=0)
                 line = p.stdout.readline()
                 while line:
                     self.widget._info(line)

@@ -21,18 +21,22 @@ class WizardPage(QtGui.QWizardPage):
             try:
                 self.widget._info(u'Importing <b>%s</b> into <b>%s</b>...' %
                                   (self.config['url'], self.config['dest']))
-                p = subprocess.Popen(['./hg', 'clone', self.config['url'],
-                                     '--config', 'extensions.hgsubversion=../hgsubversion/',
-                                     '--config', 'hgsubversion.authormap=' + self.widget.wizard().authorfile,
-                                     '--config', 'hgsubversion.defaulthost=atlassian.com',
-                                     '--config', 'ui.interactive=off',
+
+                # TODO: shell-escape the url string:
+                p = subprocess.Popen(['./hg clone ' + self.config['url'] +
+                                     ' --config extensions.hgsubversion=../hgsubversion/ '\
+                                     '--config hgsubversion.authormap=' + self.widget.wizard().authorfile +
+                                     ' --config hgsubversion.defaulthost=atlassian.com '\
+                                     '--config ui.interactive=off ' +
                                      self.config['dest']],
+                                     shell=True,
                                  cwd='./mercurial-1.8.1',
-                                 env={'LD_LIBRARY_PATH': '.',
+                                 env={'LD_LIBRARY_PATH': '..',
                                       'LC_ALL': 'en_US.UTF-8'},
-                                 shell=False,
+#                                 shell=False,
                                  stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+                                 stderr=subprocess.STDOUT,
+                                 bufsize=0)
                 line = p.stdout.readline()
                 while line:
                     self.widget._info(line)
