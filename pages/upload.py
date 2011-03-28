@@ -1,8 +1,7 @@
 from PyQt4 import QtGui, QtCore
-from util import MercurialUI
-from mercurial import hg, url as hg_url
 import util
 import sys
+import subprocess
 import traceback
 
 __author__ = 'erik'
@@ -85,15 +84,7 @@ class WizardPage(QtGui.QWizardPage):
             self.opts = opts
 
         def run(self):
-
             try:
-                self.ui = MercurialUI()
-                self.ui.logInfo = self.widget._info
-                self.ui.logError = self.widget._error
-                self.ui.setconfig('ui', 'interactive', 'off')
-                self.ui.setconfig("ui", "formatted", None)
-                self.ui.setconfig('ui', 'quiet', False)
-
                 url = u'https://%s:%s@bitbucket.org/%s/%s' % (
                     self.opts['bb_username'],
                     self.opts['bb_password'],
@@ -101,22 +92,35 @@ class WizardPage(QtGui.QWizardPage):
                     self.opts['bb_reponame']
                 )
 
-                repo = hg.repository(self.ui, path=self.opts['localDir'], create=False)
-                self.ui.write(u'Connecting to ' + hg_url.hidepassword(url))
-                other = hg.repository(hg.remoteui(repo, {}), url)
-                self.ui.write(u'pushing to %s\n' % hg_url.hidepassword(url))
+                self.widget._info(u'Connecting to ' + hg_url.hidepassword(url))
+                p = subprocess.Popen(['./hg', 'push', url,
+                                     '--config', 'ui.interactive=off'],
+                                 cwd='./mercurial-1.8.1',
+                                 env={'LD_LIBRARY_PATH': '.',
+                                      'LC_ALL': 'en_US.UTF-8'},
+                                 shell=False,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+                stop = False
+                while not stop:
+                    line = p.stdout.readline()
+                    if not line:
+                        stop = True
+                        print 'child terminated'
+                    else:
+                        print 'output: ' + line
+                        self.widget._info(line)
 
-                result = repo.push(other)
-                if result == 0:
-                    self.ui.write(u'Repository pushed successfully!')
+                ret = p.wait()
+                if ret:
+                    self.widget._error(u'Push failed. Return code: %s', str(ret))
                 else:
-                    self.ui.write_err(u'Push failed. Mercurial return code: %s', result)
-                print 'Push completed. Result code:', result
+                    self.widget._info(u'Repository pushed successfully!')
 
             except:
                 type_, message, tb = sys.exc_info()
-                self.ui.write_err(u'Push failed: %s: %s' % (type_, message))
-                self.ui.write_err(util.traceback_to_str(tb))
+                self.widget._error(u'Push failed: %s: %s' % (type_, message))
+                self.widget._error(util.traceback_to_str(tb))
                 traceback.print_exception(*sys.exc_info())
 
             finally:
